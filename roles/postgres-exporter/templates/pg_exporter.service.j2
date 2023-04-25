@@ -1,0 +1,28 @@
+{{ ansible_managed | comment }}
+
+[Unit]
+Description=Prometheus Postgresql exporter (https://github.com/wrouesnel/postgres_exporter)
+After=network-online.target
+
+[Service]
+WorkingDirectory={{ postgres_exporter_dir }}
+EnvironmentFile={{ postgres_exporter_config_install_dir }}/env
+User={{ _postgres_exporter_system_user }}
+Group={{ _postgres_exporter_system_group }}
+ExecStart={{ postgres_exporter_binary_install_dir }}/postgres_exporter {% for flag, flag_value in postgres_exporter_service_args.items() %}--{{ flag }}={{ flag_value }} {% endfor %} 
+SyslogIdentifier=postgres_exporter
+Restart=always
+RestartSec=1
+StartLimitInterval=0
+
+{% if postgres_exporter_systemd_version | int >= 232 %}
+ProtectSystem=strict
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=yes
+{% else %}
+ProtectSystem=full
+{% endif %}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+---
+- name: restart postgres_exporter
+  systemd:
+    daemon_reload: true
+    name: pg_exporter
+    state: restarted
+  when:
+    - not ansible_check_mode
